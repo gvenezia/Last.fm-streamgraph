@@ -1,4 +1,18 @@
-# Learning D3.js - The basics
+# Last.fm Listening History Streamgraph
+This is a personal recreation of a popular data visualization for last.fm that is no longer accessible.
+
+### Tech Used
+* D3 
+* JS
+* Last.fm API
+* D3 Boilerplate (see below) 
+
+
+***  
+# D3 boilerplate 
+This project has been adapted from Willam Soares' webpack-babel setup   which you can find below under the next main heading.
+
+## Willam Soares' Learning D3.js - The basics
 [![Say Thanks!](https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg)](https://saythanks.io/to/willamesoares)
 
 Although this repository was created for learning purposes, it can be easily used as a boilerplate for [D3.js](https://d3js.org/) projects.
