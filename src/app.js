@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 
 var artists = ["Tera Melos", "The Fall of Troy", "Led Zeppelin", "The Number Twelve Looks Like You", "Iron & Wine", "Maps & Atlases", "Igor Stravinsky", "Over the Rhine", "This Town Needs Guns", "Hiatus Kaiyote"]
-var years = ["2015", "2016", "2017", "2018"]
+var years = ["2013", "2014", "2015", "2016", "2017", "2018"]
 
 var parseFullDate = d3.timeParse("%d %b %Y %H:%M")
 var yearF = d3.timeFormat("%Y")
@@ -69,7 +69,7 @@ stackedData = stack(calculatedData)
 console.log('stackedData',stackedData);
 
 var width = window.innerWidth,
-    height = window.innerHeight - 20;
+    height = window.innerHeight;
 
 var xAxis = d3.axisBottom();
 
@@ -79,13 +79,10 @@ var x = d3.scaleLinear()
 
 var y = d3.scaleLinear()
     .domain([
-      d3.min(stackedData/*.concat(nextStackedData)*/, layer => d3.min(layer, d => d[0] ) ),
-      d3.max(stackedData/*.concat(nextStackedData)*/, layer => d3.max(layer, d => d[1] ) )
+      d3.min(stackedData, layers => d3.min(layers, currLayer => currLayer[0] ) ),
+      d3.max(stackedData, layers => d3.max(layers, currLayer => currLayer[1] ) )
     ])
     .range([height, 0]);
-
-console.log(d3.min(stackedData, layer => d3.min(layer, d => d[0] ) ),
-      );
 
 // Colors generated at http://tools.medialab.sciences-po.fr/iwanthue/
 var color = d3.scaleOrdinal([
@@ -102,7 +99,7 @@ var color = d3.scaleOrdinal([
 
 var area = d3.area()
     .curve( d3.curveCardinal.tension(.6) )
-    .x( (d,i) => x(i*2) )
+    .x( (d,i) => x(i) )
     .y0( d => y(d[0]) )
     .y1( d => y(d[1]) );
 
@@ -110,26 +107,77 @@ var svg = d3.select("body").append("svg")
     .attr("width", width)
     .attr("height", height);
 
+
+
 svg.selectAll("path")
     .data(stackedData)
   .enter().append("path")
+    .attr("class", 'layer')
     .attr("d", area)
     .style("fill", (d,i) => color(i) );
+
+svg
+.selectAll('text')
+    .data(stackedData)
+  .enter()
+  .append("text")
+    .attr('x', 10)
+    .attr('y', d => y( (d[0][0] + d[0][1]) /2 ) )
+    .attr('dy', '.31em') // text anchor offset
+    .attr('fill', 'white')
+    .attr('font-size', '12px')
+    .text( d => d.key)
 
 svg.append('g')
   .attr("transform", "translate(0," + height + ")")
   .call(xAxis);
 
-  // let filteredData = data.filter(d => artists.find(artist => artist === d.artist))
 
-  // console.log(filteredData);
-  // var series = stack(nest.entries(data));
-  // console.log(stack(nest.entries(data)));
 
-  // let filteredYear = filteredData.filter(d => yearF(d.date) === "2012")
-  // console.log(filteredYear);
 
-});
+}); // End d3.csv()
+
+// svg.selectAll(".layer")
+//     .attr("opacity", 1)
+//     .on("mouseover", function(d, i) {
+//       svg.selectAll(".layer").transition()
+//       .duration(250)
+//       .attr("opacity", (d, j) => j != i ? 0.6 : 1 )
+//     })
+//     .on("mousemove", function(d, i) {
+//       mousex = d3.mouse(this)[0];
+
+//       var invertedx = x.invert(mousex);
+
+//       invertedx = invertedx.getMonth() + invertedx.getDate();
+
+//       var selected = (d.values);
+
+//       for (var k = 0; k < selected.length; k++) {
+//         datearray[k] = selected[k].date
+//         datearray[k] = datearray[k].getMonth() + datearray[k].getDate();
+//       }
+
+//       mousedate = datearray.indexOf(invertedx);
+//       pro = d.values[mousedate].value;
+
+//       d3.select(this)
+//       .classed("hover", true)
+//       .attr("stroke", strokecolor)
+//       .attr("stroke-width", "0.5px"), 
+//       tooltip.html( "<p>" + d.key + "<br>" + pro + "</p>" ).style("visibility", "visible");
+      
+//     })
+//     .on("mouseout", function(d, i) {
+//      svg.selectAll(".layer")
+//       .transition()
+//       .duration(250)
+//       .attr("opacity", "1");
+//       d3.select(this)
+//       .classed("hover", false)
+//       .attr("stroke-width", "0px"), tooltip.html( "<p>" + d.key + "<br>" + pro + "</p>" ).style("visibility", "hidden");
+//   })
+
 // ==============================================================================
 
 // OLD LOGIC FOR TESTING 
