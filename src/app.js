@@ -12,8 +12,8 @@ console.log(yearF(parseFullDate(dateString)));
 
 // ==============================================================================
 
-var n = years.length, // number of layers
-    m = artists.length, // number of samples per layer
+var n = artists.length, // number of layers
+    m = years.length, // number of samples per layer
     stack = d3.stack()
               .keys( artists )
               .offset( d3.stackOffsetWiggle );
@@ -69,7 +69,9 @@ stackedData = stack(calculatedData)
 console.log('stackedData',stackedData);
 
 var width = window.innerWidth,
-    height = window.innerHeight;
+    height = window.innerHeight - 20;
+
+var xAxis = d3.axisBottom();
 
 var x = d3.scaleLinear()
     .domain([0, m - 1])
@@ -100,7 +102,7 @@ var color = d3.scaleOrdinal([
 
 var area = d3.area()
     .curve( d3.curveCardinal.tension(.6) )
-    .x( (d,i) => x(i) )
+    .x( (d,i) => x(i*2) )
     .y0( d => y(d[0]) )
     .y1( d => y(d[1]) );
 
@@ -112,7 +114,11 @@ svg.selectAll("path")
     .data(stackedData)
   .enter().append("path")
     .attr("d", area)
-    .style("fill", () => color(Math.random()) );
+    .style("fill", (d,i) => color(i) );
+
+svg.append('g')
+  .attr("transform", "translate(0," + height + ")")
+  .call(xAxis);
 
   // let filteredData = data.filter(d => artists.find(artist => artist === d.artist))
 
