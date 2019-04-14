@@ -2,21 +2,25 @@ import * as d3 from 'd3';
 import axios from 'axios';
 
 //  AXIOS CALL AND DATA =============================================
-let user = 'grrtano';
+window.onload = function(){
+  let user = 'grrtano';
 
-const axiosLastfm = axios.create({
-  baseURL: `http://ws.audioscrobbler.com/2.0/`
-});
+  const axiosLastfm = axios.create({
+    baseURL: `http://ws.audioscrobbler.com/2.0/`
+  });
+  console.log(process.env);
 
-const lastfmKeyAndConfig = `&api_key=${process.env.REACT_APP_LASTM_KEY}&format=json`;
+  const lastfmKeyAndConfig = `&api_key=${process.env.LASTM_KEY}&format=json`;
 
-let URIEncodedUser = encodeURIComponent(user);
+  let URIEncodedUser = encodeURIComponent(user);
 
 
-axiosLastfm.get(`?method=user.getrecenttracks&user=${URIEncodedUser}&limit=17${lastfmKeyAndConfig}`)
-  .then(response => {console.log(response)})
+  axiosLastfm.get(`?method=user.getrecenttracks&user=${URIEncodedUser}&limit=17${lastfmKeyAndConfig}`)
+    .then(response => {console.log(response)})
 
-// console.log(response);
+  // console.log(response);
+}
+
 // =============================================
 
 
