@@ -8,8 +8,6 @@ var yearF = d3.timeFormat("%Y")
 
 var dateString = "06 Feb 2019 19:37";
 
-console.log(yearF(parseFullDate(dateString)));
-
 // ==============================================================================
 
 var n = artists.length, // number of layers
@@ -18,28 +16,6 @@ var n = artists.length, // number of layers
               .keys( artists )
               .offset( d3.stackOffsetWiggle );
 
-// Create empty data structures
-// var matrix0 = years.map( d => {return {year:d}} );
-// var matrix1 = years.map( d => {return {year:d}} );
-
-// console.log((function(){var n = 20, // number of layers
-//     m = 200, // number of samples per layer
-//     stack = d3.stack().keys(d3.range(n).map(function (d) { return "layer"+d; })).offset(d3.stackOffsetWiggle);
-
-//     // Create empty data structures
-//     var matrix0 = d3.range(m).map(function (d) { return { x:d }; });
-//     var matrix1 = d3.range(m).map(function (d) { return { x:d }; });
-
-//     console.log(d3.range(m).map(function (d) { return { x:d }; }));
-
-//     // Fill them with random data
-//     d3.range(n).map(function(d) { bumpLayer(m, matrix0, d); });
-//     d3.range(n).map(function(d) { bumpLayer(m, matrix1, d); });
-
-//     console.log(matrix0);
-// })());
-
-// ==============================================================================
 let calculatedData = [];
 let stackedData = []
 
@@ -59,81 +35,95 @@ var graph = d3.csv("data/grrtano-last-fm.csv", data => {
     });
 
     calculatedData.push(artistObj)
-  })
+  });
 
   console.log(calculatedData);
 
-stackedData = stack(calculatedData)
-  //, nextStackedData = stack(matrix1);
+  stackedData = stack(calculatedData);
 
-console.log('stackedData',stackedData);
+  console.log('stackedData',stackedData);
 
-var width = window.innerWidth,
-    height = window.innerHeight;
+  var width = window.innerWidth,
+      height = window.innerHeight;
 
-var xAxis = d3.axisBottom();
+  var xAxis = d3.axisBottom();
 
-var x = d3.scaleLinear()
-    .domain([0, m - 1])
-    .range([0, width]);
+  var x = d3.scaleLinear()
+      .domain([0, m - 1])
+      .range([0, width]);
 
-var y = d3.scaleLinear()
-    .domain([
-      d3.min(stackedData, layers => d3.min(layers, currLayer => currLayer[0] ) ),
-      d3.max(stackedData, layers => d3.max(layers, currLayer => currLayer[1] ) )
-    ])
-    .range([height, 0]);
+  var y = d3.scaleLinear()
+      .domain([
+        d3.min(stackedData, layers => d3.min(layers, currLayer => currLayer[0] ) ),
+        d3.max(stackedData, layers => d3.max(layers, currLayer => currLayer[1] ) )
+      ])
+      .range([height, 0]);
 
-// Colors generated at http://tools.medialab.sciences-po.fr/iwanthue/
-var color = d3.scaleOrdinal([
-  "#5bca77",
-  "#d64936",
-  "#91c441",
-  "#cf526c",
-  "#6db9a7",
-  "#d67e39",
-  "#6e8b4d",
-  "#d5a08d",
-  "#d0b148",
-  "#966b43"]);
+  // Colors generated at http://tools.medialab.sciences-po.fr/iwanthue/
+  var color = d3.scaleOrdinal([
+    "#5bca77",
+    "#d64936",
+    "#91c441",
+    "#cf526c",
+    "#6db9a7",
+    "#d67e39",
+    "#6e8b4d",
+    "#d5a08d",
+    "#d0b148",
+    "#966b43"]);
 
-var area = d3.area()
-    .curve( d3.curveCardinal.tension(.6) )
-    .x( (d,i) => x(i) )
-    .y0( d => y(d[0]) )
-    .y1( d => y(d[1]) );
+  var area = d3.area()
+      .curve( d3.curveCardinal.tension(.6) )
+      .x( (d,i) => x(i) )
+      .y0( d => y(d[0]) )
+      .y1( d => y(d[1]) );
 
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
+  var svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height);
 
+  svg.selectAll("path")
+      .data(stackedData)
+    .enter().append("path")
+      .attr("class", 'layer')
+      .attr("d", area)
+      .style("fill", (d,i) => color(i) );
 
+  let maxArr = [];
 
-svg.selectAll("path")
-    .data(stackedData)
-  .enter().append("path")
-    .attr("class", 'layer')
-    .attr("d", area)
-    .style("fill", (d,i) => color(i) );
+  stackedData.forEach(d => {
+    let max = d3.max(calculatedData, yearObj => yearObj[d.key])
+    let maxIndex = -1;
 
-svg
-.selectAll('text')
-    .data(stackedData)
-  .enter()
-  .append("text")
-    .attr('x', 10)
-    .attr('y', d => y( (d[0][0] + d[0][1]) /2 ) )
-    .attr('dy', '.31em') // text anchor offset
-    .attr('fill', 'white')
-    .attr('font-size', '12px')
-    .text( d => d.key)
+    for (let i = 0; i < m; i++){
+      if (calculatedData[i][d.key] === max)
+        maxArr.push(i);
+    }
+  });
 
-svg.append('g')
-  .attr("transform", "translate(0," + height + ")")
-  .call(xAxis);
+  svg
+  .selectAll('text')
+      .data(stackedData)
+    .enter()
+    .append("text")
+      .attr('x', (d,i) => x( maxArr[i] ))
+      .attr('y', (d,i) => {
+        let j = maxArr[i];
+        return y( (d[j][0] + d[j][1]) /2 ) 
+      })
+      .attr('dy', '.31em') // text anchor offset
+      .attr('fill', 'white')
+      .attr('font-size', '12px')
+      .attr('text-anchor', (d,i) => {
+        return maxArr[i] === 0 ? 'start' :
+          maxArr[i] === years.length - 1 ? 'end' :
+            'middle';
+      })
+      .text( d => d.key)
 
-
-
+  svg.append('g')
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
 
 }); // End d3.csv()
 
