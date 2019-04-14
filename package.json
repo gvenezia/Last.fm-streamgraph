@@ -53,6 +53,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.3",
+    "axios": "^0.18.0",
     "d3": "^4"
   }
 }

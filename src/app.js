@@ -1,4 +1,24 @@
 import * as d3 from 'd3';
+import axios from 'axios';
+
+//  AXIOS CALL AND DATA =============================================
+let user = 'grrtano';
+
+const axiosLastfm = axios.create({
+  baseURL: `http://ws.audioscrobbler.com/2.0/`
+});
+
+const lastfmKeyAndConfig = `&api_key=${process.env.REACT_APP_LASTM_KEY}&format=json`;
+
+let URIEncodedUser = encodeURIComponent(user);
+
+
+axiosLastfm.get(`?method=user.getrecenttracks&user=${URIEncodedUser}&limit=17${lastfmKeyAndConfig}`)
+  .then(response => {console.log(response)})
+
+// console.log(response);
+// =============================================
+
 
 var artists = ["Tera Melos", "The Fall of Troy", "Led Zeppelin", "The Number Twelve Looks Like You", "Iron & Wine", "Maps & Atlases", "Igor Stravinsky", "Over the Rhine", "This Town Needs Guns", "Hiatus Kaiyote"]
 var years = [
@@ -59,7 +79,9 @@ var graph = d3.csv("data/grrtano-last-fm_4-14-19.csv", data => {
       ])
       .range([height, 0]);
 
-  var xAxis = d3.axisBottom().scale(x);
+  var xAxis = d3.axisBottom()
+    .tickFormat( (d,i) => years[i] )
+    .scale(x);
 
   // Colors generated at http://tools.medialab.sciences-po.fr/iwanthue/
   var color = d3.scaleOrdinal([
@@ -124,7 +146,7 @@ var graph = d3.csv("data/grrtano-last-fm_4-14-19.csv", data => {
       .text( d => d.key)
 
   svg.append('g')
-    .attr("transform", "translate(0," + height + ")")
+    .attr("transform", "translate(0," + 300 + ")")
     .call(xAxis);
 
 }); // End d3.csv()
