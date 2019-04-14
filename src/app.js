@@ -1,7 +1,9 @@
 import * as d3 from 'd3';
 
 var artists = ["Tera Melos", "The Fall of Troy", "Led Zeppelin", "The Number Twelve Looks Like You", "Iron & Wine", "Maps & Atlases", "Igor Stravinsky", "Over the Rhine", "This Town Needs Guns", "Hiatus Kaiyote"]
-var years = ["2013", "2014", "2015", "2016", "2017", "2018"]
+var years = [
+// "2009",
+'2010','2011', '2012','2013', "2014", "2015", "2016", "2017", "2018", '2019']
 
 var parseFullDate = d3.timeParse("%d %b %Y %H:%M")
 var yearF = d3.timeFormat("%Y")
@@ -19,7 +21,7 @@ var n = artists.length, // number of layers
 let calculatedData = [];
 let stackedData = []
 
-var graph = d3.csv("data/grrtano-last-fm.csv", data => {
+var graph = d3.csv("data/grrtano-last-fm_4-14-19.csv", data => {
   data.forEach( d => {
     d.date = parseFullDate(d.date);
   });
@@ -46,8 +48,6 @@ var graph = d3.csv("data/grrtano-last-fm.csv", data => {
   var width = window.innerWidth,
       height = window.innerHeight;
 
-  var xAxis = d3.axisBottom();
-
   var x = d3.scaleLinear()
       .domain([0, m - 1])
       .range([0, width]);
@@ -58,6 +58,8 @@ var graph = d3.csv("data/grrtano-last-fm.csv", data => {
         d3.max(stackedData, layers => d3.max(layers, currLayer => currLayer[1] ) )
       ])
       .range([height, 0]);
+
+  var xAxis = d3.axisBottom().scale(x);
 
   // Colors generated at http://tools.medialab.sciences-po.fr/iwanthue/
   var color = d3.scaleOrdinal([
