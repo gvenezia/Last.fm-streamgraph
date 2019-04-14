@@ -15,7 +15,7 @@ console.log(yearF(parseFullDate(dateString)));
 var n = years.length, // number of layers
     m = artists.length, // number of samples per layer
     stack = d3.stack()
-              .keys( years.map(year => "year" + year) )
+              .keys( artists )
               .offset( d3.stackOffsetWiggle );
 
 // Create empty data structures
@@ -48,14 +48,14 @@ var graph = d3.csv("data/grrtano-last-fm.csv", data => {
     d.date = parseFullDate(d.date);
   });
 
-  artists.forEach(artist => {
-    let artistObj = {artist}
+  years.forEach(year => {
+    let artistObj = {year}
     
-    years.forEach(year => {
+    artists.forEach(artist => {
       
       let filteredData = data.filter(d => artist === d.artist && yearF(d.date) === year);
 
-      artistObj["year" + year] = filteredData.length;
+      artistObj[artist] = filteredData.length;
     });
 
     calculatedData.push(artistObj)
@@ -68,8 +68,8 @@ stackedData = stack(calculatedData)
 
 console.log('stackedData',stackedData);
 
-var width = 960,
-    height = 500;
+var width = window.innerWidth,
+    height = window.innerHeight;
 
 var x = d3.scaleLinear()
     .domain([0, m - 1])
@@ -85,11 +85,21 @@ var y = d3.scaleLinear()
 console.log(d3.min(stackedData, layer => d3.min(layer, d => d[0] ) ),
       );
 
-var color = d3.scaleLinear()
-    .range(["#ead", "#256"]);
+// Colors generated at http://tools.medialab.sciences-po.fr/iwanthue/
+var color = d3.scaleOrdinal([
+  "#5bca77",
+  "#d64936",
+  "#91c441",
+  "#cf526c",
+  "#6db9a7",
+  "#d67e39",
+  "#6e8b4d",
+  "#d5a08d",
+  "#d0b148",
+  "#966b43"]);
 
 var area = d3.area()
-    .curve( d3.curveCardinal )
+    .curve( d3.curveCardinal.tension(.6) )
     .x( (d,i) => x(i) )
     .y0( d => y(d[0]) )
     .y1( d => y(d[1]) );

@@ -1,9 +1,11 @@
 // Import styles here
+html, body {
+  overflow: hidden
+}
 body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   margin: auto;
   position: relative;
-  width: 960px;
 }
 
 button {
