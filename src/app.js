@@ -1,8 +1,6 @@
 import * as d3 from 'd3';
 import axios from 'axios';
 
-let axiosArtists = [];
-
 //  AXIOS CALL AND DATA =============================================
 window.onload = function(){
   let user = 'grrtano';
@@ -10,54 +8,53 @@ window.onload = function(){
   const axiosLastfm = axios.create({
     baseURL: `http://ws.audioscrobbler.com/2.0/`
   });
-  console.log(process.env);
 
   const lastfmKeyAndConfig = `&api_key=${process.env.LASTM_KEY}&format=json`;
 
   let URIEncodedUser = encodeURIComponent(user);
 
-  axiosLastfm.get(`?method=user.gettopartists&user=${URIEncodedUser}&limit=5000${lastfmKeyAndConfig}`)
-    .then(response => {
-      console.log(response.data.topartists.artist.map(d => d.name))
-
-      return response.data.topartists.artist.map(d => d.name);
-    }).then(axiosArtists => {drawChart(axiosArtists)})
-
-  // console.log(response);
+  axiosLastfm.get(`?method=user.gettopartists&user=${URIEncodedUser}&limit=15${lastfmKeyAndConfig}`)
+    // Extract just the artist names from the response
+    .then(response => response.data.topartists.artist.map(d => d.name) )
+    // Use artist names in d3 chart
+    .then(axiosArtists => {drawChart(axiosArtists)})
 }
 
 // =============================================
 function drawChart(axiosArtists){
-  var defaultArtists = ["Tera Melos", "The Fall of Troy", "Led Zeppelin", "The Number Twelve Looks Like You", "Iron & Wine", "Maps & Atlases", "Igor Stravinsky", "Over the Rhine", "This Town Needs Guns", "Hiatus Kaiyote"]
-  var artists = axiosArtists ? axiosArtists : defaultArtists;
-  // ["Tera Melos", "The Fall of Troy", "Led Zeppelin", "The Number Twelve Looks Like You", "Iron & Wine", "Maps & Atlases", "Igor Stravinsky", "Over the Rhine", "This Town Needs Guns", "Hiatus Kaiyote", "Stars", "Porcupine Tree", "Antônio Carlos Jobim", "Rush", "Sara Tavares", "Underoath", "Becca Stevens Band", "The Sound of Animals Fighting", "Jacob Collier", "Faraquet"];
+  // Set the years ==============
+  // Date parsing and formatting functions
+  let parseFullDate = d3.timeParse("%d %b %Y %H:%M"),
+      yearF = d3.timeFormat("%Y");
+
+  let startYear = 2012,
+      endYear = 2019;
   
-  var years = [
-  // '2008',
-  // "2009",
-  '2010','2011', '2012','2013', "2014", "2015", "2016", "2017", "2018", '2019']
+  let years = d3.timeYear.range(new Date(startYear,0), new Date(endYear,0), 1)
 
-  var parseFullDate = d3.timeParse("%d %b %Y %H:%M")
-  var yearF = d3.timeFormat("%Y")
+  years = years.map( d => yearF(d) );
 
-  var dateString = "06 Feb 2019 19:37";
-
-  // ==============================================================================
-
-  var n = artists.length, // number of layers
-      m = years.length, // number of samples per layer
-      stack = d3.stack()
-                .keys( artists )
-                .offset( d3.stackOffsetWiggle );
+  // Set the artists ==============
+  let defaultArtists = ["Tera Melos", "The Fall of Troy", "Led Zeppelin", "The Number Twelve Looks Like You", "Iron & Wine", "Maps & Atlases", "Igor Stravinsky", "Over the Rhine", "This Town Needs Guns", "Hiatus Kaiyote"]
+  let artists = axiosArtists ? axiosArtists : defaultArtists;
 
   let calculatedData = [];
   let stackedData = []
 
-  var graph = d3.csv("data/grrtano-last-fm_4-14-19.csv", data => {
+  const n = artists.length, // number of layers
+        m = years.length; // number of samples per layer
+  
+  const stack = d3.stack()
+        .keys( artists )
+        .offset( d3.stackOffsetWiggle );
+
+  d3.csv("data/grrtano-last-fm_4-14-19.csv", data => {
+    // Format the date
     data.forEach( d => {
       d.date = parseFullDate(d.date);
     });
 
+    // Find playcount per artist and year
     years.forEach(year => {
       let artistObj = {year}
       
@@ -71,29 +68,39 @@ function drawChart(axiosArtists){
       calculatedData.push(artistObj)
     });
 
-    console.log(calculatedData);
-
+    // Stack the data for streamgraph configuration
     stackedData = stack(calculatedData);
 
-    console.log('stackedData',stackedData);
-
-    var width = window.innerWidth,
+    let width = window.innerWidth,
         height = window.innerHeight;
 
-    var x = d3.scaleLinear()
+    let x = d3.scaleLinear()
         .domain([0, m - 1])
         .range([0, width]);
 
-    var y = d3.scaleLinear()
+    let y = d3.scaleLinear()
         .domain([
           d3.min(stackedData, layers => d3.min(layers, currLayer => currLayer[0] ) ),
           d3.max(stackedData, layers => d3.max(layers, currLayer => currLayer[1] ) )
         ])
         .range([height, 0]);
 
-    var xAxis = d3.axisBottom()
-      .tickFormat( (d,i) => years[i] )
-      .scale(x);
+    let xAxis = d3.axisBottom()
+        .ticks( years.length )
+        .tickFormat( (d,i) => years[i] )
+        .scale(x);
+
+    let maxArr = [];
+
+    stackedData.forEach(d => {
+      let max = d3.max(calculatedData, yearObj => yearObj[d.key])
+      let maxIndex = -1;
+
+      for (let i = 0; i < m; i++){
+        if (calculatedData[i][d.key] === max)
+          maxArr.push(i);
+      }
+    });
 
     // Colors generated at http://tools.medialab.sciences-po.fr/iwanthue/
     // var color = d3.scaleOrdinal([
@@ -108,34 +115,34 @@ function drawChart(axiosArtists){
     //   "#d0b148",
     //   "#966b43"]);
 
-    var color = d3.scaleOrdinal(["#554300",
-"#6836c4",
-"#38c83e",
-"#8883ff",
-"#2a9c00",
-"#995bc2",
-"#89da6b",
-"#016cbf",
-"#ffa419",
-"#6ca7ff",
-"#6a8100",
-"#00aed0",
-"#9d562a",
-"#00ddc5",
-"#6e4e3c",
-"#01be75",
-"#8f8097",
-"#008044",
-"#a8cae7",
-"#395800",
-"#9ad2b9",
-"#093a44",
-"#c5cb84",
-"#00595e",
-"#01918b"]);
+    var color = d3.scaleOrdinal(["#a38575",
+        "#354f9e",
+        "#e5d072",
+        "#4d77cb",
+        "#838f32",
+        "#81abff",
+        "#784e00",
+        "#48e2fd",
+        "#6f3100",
+        "#019bb8",
+        "#f59c68",
+        "#0272ad",
+        "#bc7b39",
+        "#01a294",
+        "#8f70a1",
+        "#87b45e",
+        "#a091a8",
+        "#4b7d2c",
+        "#bdd3e4",
+        "#353618",
+        "#e4ce8f",
+        "#005351",
+        "#c7d6a4",
+        "#006a4c",
+        "#3fab70"]);
 
     var area = d3.area()
-        .curve( d3.curveCardinal.tension(.6) )
+        .curve( d3.curveCardinal.tension(.1) )
         .x( (d,i) => x(i) )
         .y0( d => y(d[0]) )
         .y1( d => y(d[1]) );
@@ -151,23 +158,12 @@ function drawChart(axiosArtists){
         .attr("d", area)
         .style("fill", (d,i) => color(i) );
 
-    let maxArr = [];
-
-    stackedData.forEach(d => {
-      let max = d3.max(calculatedData, yearObj => yearObj[d.key])
-      let maxIndex = -1;
-
-      for (let i = 0; i < m; i++){
-        if (calculatedData[i][d.key] === max)
-          maxArr.push(i);
-      }
-    });
-
-    svg
-    .selectAll('text')
+    // Add artist's text labels
+    svg.selectAll('text')
         .data(stackedData)
       .enter()
       .append("text")
+        .attr('class', 'artist-text')
         .attr('x', (d,i) => x( maxArr[i] )) // Place the artist's text in the year where they had the most plays (thus the most area to display the name)
         .attr('y', (d,i) => {
           let j = maxArr[i];
@@ -183,100 +179,52 @@ function drawChart(axiosArtists){
         })
         .text( d => d.key)
 
+    // Add timeline text
     svg.append('g')
-      .attr("transform", "translate(0," + 300 + ")")
+      .attr("transform", "translate(0," + height -20 + ")")
       .call(xAxis);
 
   }); // End d3.csv()
+} // End drawChart();
 
-  // svg.selectAll(".layer")
-  //     .attr("opacity", 1)
-  //     .on("mouseover", function(d, i) {
-  //       svg.selectAll(".layer").transition()
-  //       .duration(250)
-  //       .attr("opacity", (d, j) => j != i ? 0.6 : 1 )
-  //     })
-  //     .on("mousemove", function(d, i) {
-  //       mousex = d3.mouse(this)[0];
+// ========================== vertical grid line on mousemove ====================================================
+// svg.selectAll(".layer")
+//     .attr("opacity", 1)
+//     .on("mouseover", function(d, i) {
+//       svg.selectAll(".layer").transition()
+//       .duration(250)
+//       .attr("opacity", (d, j) => j != i ? 0.6 : 1 )
+//     })
+//     .on("mousemove", function(d, i) {
+//       mousex = d3.mouse(this)[0];
 
-  //       var invertedx = x.invert(mousex);
+//       var invertedx = x.invert(mousex);
 
-  //       invertedx = invertedx.getMonth() + invertedx.getDate();
+//       invertedx = invertedx.getMonth() + invertedx.getDate();
 
-  //       var selected = (d.values);
+//       var selected = (d.values);
 
-  //       for (var k = 0; k < selected.length; k++) {
-  //         datearray[k] = selected[k].date
-  //         datearray[k] = datearray[k].getMonth() + datearray[k].getDate();
-  //       }
+//       for (var k = 0; k < selected.length; k++) {
+//         datearray[k] = selected[k].date
+//         datearray[k] = datearray[k].getMonth() + datearray[k].getDate();
+//       }
 
-  //       mousedate = datearray.indexOf(invertedx);
-  //       pro = d.values[mousedate].value;
+//       mousedate = datearray.indexOf(invertedx);
+//       pro = d.values[mousedate].value;
 
-  //       d3.select(this)
-  //       .classed("hover", true)
-  //       .attr("stroke", strokecolor)
-  //       .attr("stroke-width", "0.5px"), 
-  //       tooltip.html( "<p>" + d.key + "<br>" + pro + "</p>" ).style("visibility", "visible");
-        
-  //     })
-  //     .on("mouseout", function(d, i) {
-  //      svg.selectAll(".layer")
-  //       .transition()
-  //       .duration(250)
-  //       .attr("opacity", "1");
-  //       d3.select(this)
-  //       .classed("hover", false)
-  //       .attr("stroke-width", "0px"), tooltip.html( "<p>" + d.key + "<br>" + pro + "</p>" ).style("visibility", "hidden");
-  //   })
-
-  // ==============================================================================
-
-  // OLD LOGIC FOR TESTING 
-  // Fill them with random data
-  // years.map(d => bumpLayer(m, matrix0, d) );
-  // years.map(d => bumpLayer(m, matrix1, d) );
-
-  // console.log(matrix0);
-
-
-
-
-
-
-  // function transition() {
-  //   d3.selectAll("path")
-  //       .data(function() {
-  //         var d = nextStackedData;
-  //         nextStackedData = stackedData;
-  //         return stackedData = d;
-  //       })
-  //     .transition()
-  //       .duration(2500)
-  //       .attr("d", area);
-  // }
-
-  // Inspired by Lee Byron's test data generator.
-  // function bumpLayer(n, matrix, layer) {
-
-  //   function bump(a) {
-  //     var x = 1 / (.1 + Math.random()),
-  //         y = 2 * Math.random() - .5,
-  //         z = 10 / (.1 + Math.random());
-  //     for (var i = 0; i < n; i++) {
-  //       var w = (i / n - y) * z;
-  //       a[i] += x * Math.exp(-w * w);
-  //     }
-  //   }
-
-  //   var a = [], i;
-  //   var i;
-
-  //   for (i = 0; i < n; ++i) a[i] = 0;
-  //   for (i = 0; i < 5; ++i) bump(a);
-
-  //   return a.forEach(function(d, i) {
-  //     matrix[i]["layer" + layer] = Math.max(0, d) + 1; 
-  //   });
-  // }  
-}
+//       d3.select(this)
+//       .classed("hover", true)
+//       .attr("stroke", strokecolor)
+//       .attr("stroke-width", "0.5px"), 
+//       tooltip.html( "<p>" + d.key + "<br>" + pro + "</p>" ).style("visibility", "visible");
+      
+//     })
+//     .on("mouseout", function(d, i) {
+//      svg.selectAll(".layer")
+//       .transition()
+//       .duration(250)
+//       .attr("opacity", "1");
+//       d3.select(this)
+//       .classed("hover", false)
+//       .attr("stroke-width", "0px"), tooltip.html( "<p>" + d.key + "<br>" + pro + "</p>" ).style("visibility", "hidden");
+//   })

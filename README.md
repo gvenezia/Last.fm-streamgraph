@@ -7,6 +7,8 @@ This is a personal recreation of a popular data visualization for last.fm that i
 * Last.fm API
 * D3 Boilerplate (see below) 
 
+![Screen Shot 2019-04-15 at 5 04 34 PM](https://user-images.githubusercontent.com/31457853/56168388-adfdac80-5fa0-11e9-9b59-a44afb4b2c80.png)
+
 
 ***  
 # D3 boilerplate 
