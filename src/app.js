@@ -22,6 +22,9 @@ window.onload = function(){
 
 // =============================================
 function drawChart(axiosArtists){
+  let width = window.innerWidth,
+      height = window.innerHeight;
+
   // Set the years ==============
   // Date parsing and formatting functions
   let parseFullDate = d3.timeParse("%d %b %Y %H:%M"),
@@ -71,9 +74,6 @@ function drawChart(axiosArtists){
     // Stack the data for streamgraph configuration
     stackedData = stack(calculatedData);
 
-    let width = window.innerWidth,
-        height = window.innerHeight;
-
     let x = d3.scaleLinear()
         .domain([0, m - 1])
         .range([0, width]);
@@ -103,54 +103,21 @@ function drawChart(axiosArtists){
     });
 
     // Colors generated at http://tools.medialab.sciences-po.fr/iwanthue/
-    // var color = d3.scaleOrdinal([
-    //   "#5bca77",
-    //   "#d64936",
-    //   "#91c441",
-    //   "#cf526c",
-    //   "#6db9a7",
-    //   "#d67e39",
-    //   "#6e8b4d",
-    //   "#d5a08d",
-    //   "#d0b148",
-    //   "#966b43"]);
+    // 20 colors
+    const color = d3.scaleOrdinal(["#a38575","#354f9e","#e5d072","#4d77cb","#838f32","#81abff","#784e00","#48e2fd","#6f3100","#019bb8","#f59c68","#0272ad","#bc7b39","#01a294","#8f70a1","#87b45e","#a091a8","#4b7d2c","#bdd3e4","#353618","#e4ce8f","#005351","#c7d6a4","#006a4c","#3fab70"]);
+    // 10 colors ["#5bca77","#d64936","#91c441","#cf526c","#6db9a7","#d67e39","#6e8b4d","#d5a08d","#d0b148","#966b43"]
 
-    var color = d3.scaleOrdinal(["#a38575",
-        "#354f9e",
-        "#e5d072",
-        "#4d77cb",
-        "#838f32",
-        "#81abff",
-        "#784e00",
-        "#48e2fd",
-        "#6f3100",
-        "#019bb8",
-        "#f59c68",
-        "#0272ad",
-        "#bc7b39",
-        "#01a294",
-        "#8f70a1",
-        "#87b45e",
-        "#a091a8",
-        "#4b7d2c",
-        "#bdd3e4",
-        "#353618",
-        "#e4ce8f",
-        "#005351",
-        "#c7d6a4",
-        "#006a4c",
-        "#3fab70"]);
-
-    var area = d3.area()
+    let area = d3.area()
         .curve( d3.curveCardinal.tension(.1) )
         .x( (d,i) => x(i) )
         .y0( d => y(d[0]) )
         .y1( d => y(d[1]) );
 
-    var svg = d3.select("body").append("svg")
+    let svg = d3.select("body").append("svg")
         .attr("width", width)
         .attr("height", height);
 
+    // Add the paths and area for artists' playcounts
     svg.selectAll("path")
         .data(stackedData)
       .enter().append("path")
@@ -179,7 +146,7 @@ function drawChart(axiosArtists){
         })
         .text( d => d.key)
 
-    // Add timeline text
+    // Add timeline text at the top
     svg.append('g')
       .attr("transform", "translate(0," + height -20 + ")")
       .call(xAxis);
