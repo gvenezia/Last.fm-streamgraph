@@ -1,14 +1,14 @@
 # Last.fm Listening History Streamgraph
-This is a personal recreation of a popular data visualization for last.fm that is no longer accessible.
+Takes your last.fm listening history and converts it to a streamgraph.
 
 ### Tech Used
 * D3 
 * JS
 * Last.fm API
-* D3 Boilerplate (see below) 
+* D3 Boilerplate (explained after the screenshot below) 
 
+*work in progress screenshot*
 ![Screen Shot 2019-04-15 at 5 04 34 PM](https://user-images.githubusercontent.com/31457853/56168388-adfdac80-5fa0-11e9-9b59-a44afb4b2c80.png)
-
 
 ***  
 # D3 boilerplate 
