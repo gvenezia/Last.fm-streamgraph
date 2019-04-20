@@ -3,6 +3,12 @@ import axios from 'axios';
 
 const drawButton = d3.select('#draw-button');
 
+// Axios constants
+const axiosLastfm = axios.create({
+    baseURL: `http://ws.audioscrobbler.com/2.0/`
+  });
+const lastfmKeyAndConfig = `&api_key=${process.env.LASTM_KEY}&format=json`;
+
 // Add button click event to get data and call
 window.onload = function(){
   drawButton.on('click', axiosCall);
@@ -10,18 +16,14 @@ window.onload = function(){
 
 //  AXIOS CALL AND DATA =============================================
 function axiosCall(){
-  drawButton.attr('class', 'ui loading button')
+  // Show loading button
+  drawButton.attr('class', 'ui loading button');
 
-  let user = 'grrtano';
+  // Declare variables using html menu options
+  let user = d3.select('#user').node().value,
+      userMethod = '&user=' + encodeURIComponent(user);
 
-  const axiosLastfm = axios.create({
-    baseURL: `http://ws.audioscrobbler.com/2.0/`
-  });
-
-  const lastfmKeyAndConfig = `&api_key=${process.env.LASTM_KEY}&format=json`;
-
-  let userMethod = '&user=' + encodeURIComponent(user);
-
+  // Get the data with the variables
   axiosLastfm.get(`?method=user.gettopartists&limit=25${userMethod}${lastfmKeyAndConfig}`)
     // Extract just the artist names from the response
     .then(response => response.data.topartists.artist.map(d => d.name) )
