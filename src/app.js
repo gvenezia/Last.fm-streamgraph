@@ -3,18 +3,16 @@ import axios from 'axios';
 
 const drawButton = d3.select('#draw-button');
 
+// Add button click event to get data and call
 window.onload = function(){
-  // Add button click event
   drawButton.on('click', axiosCall);
 } 
 
 //  AXIOS CALL AND DATA =============================================
-
-
 function axiosCall(){
-  let user = 'grrtano';
-
   drawButton.attr('class', 'ui loading button')
+
+  let user = 'grrtano';
 
   const axiosLastfm = axios.create({
     baseURL: `http://ws.audioscrobbler.com/2.0/`
@@ -24,7 +22,7 @@ function axiosCall(){
 
   let userMethod = '&user=' + encodeURIComponent(user);
 
-  axiosLastfm.get(`?method=user.gettopartists&limit=15${userMethod}${lastfmKeyAndConfig}`)
+  axiosLastfm.get(`?method=user.gettopartists&limit=25${userMethod}${lastfmKeyAndConfig}`)
     // Extract just the artist names from the response
     .then(response => response.data.topartists.artist.map(d => d.name) )
     // Use artist names in d3 chart
@@ -33,7 +31,7 @@ function axiosCall(){
 
 // =============================================
 function drawChart(axiosArtists){
-  let margin = {top: 40, right: 0, bottom: 0, left: 0}
+  let margin = {top: 20, right: 0, bottom: 0, left: 0}
 
   let width = window.innerWidth,
       height = window.innerHeight;
