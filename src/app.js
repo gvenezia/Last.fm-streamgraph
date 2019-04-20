@@ -1,9 +1,20 @@
 import * as d3 from 'd3';
 import axios from 'axios';
 
-//  AXIOS CALL AND DATA =============================================
+const drawButton = d3.select('#draw-button');
+
 window.onload = function(){
+  // Add button click event
+  drawButton.on('click', axiosCall);
+} 
+
+//  AXIOS CALL AND DATA =============================================
+
+
+function axiosCall(){
   let user = 'grrtano';
+
+  drawButton.attr('class', 'ui loading button')
 
   const axiosLastfm = axios.create({
     baseURL: `http://ws.audioscrobbler.com/2.0/`
@@ -11,9 +22,9 @@ window.onload = function(){
 
   const lastfmKeyAndConfig = `&api_key=${process.env.LASTM_KEY}&format=json`;
 
-  let URIEncodedUser = encodeURIComponent(user);
+  let userMethod = '&user=' + encodeURIComponent(user);
 
-  axiosLastfm.get(`?method=user.gettopartists&user=${URIEncodedUser}&limit=15${lastfmKeyAndConfig}`)
+  axiosLastfm.get(`?method=user.gettopartists&limit=15${userMethod}${lastfmKeyAndConfig}`)
     // Extract just the artist names from the response
     .then(response => response.data.topartists.artist.map(d => d.name) )
     // Use artist names in d3 chart
@@ -22,8 +33,17 @@ window.onload = function(){
 
 // =============================================
 function drawChart(axiosArtists){
+  let margin = {top: 40, right: 0, bottom: 0, left: 0}
+
   let width = window.innerWidth,
       height = window.innerHeight;
+
+  // Margin convention
+  let svg = d3.select("body").append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append('g')
+        .attr('transform', `translate(0,${margin.top})`);
 
   // Set the years ==============
   // Date parsing and formatting functions
@@ -51,7 +71,7 @@ function drawChart(axiosArtists){
         .keys( artists )
         .offset( d3.stackOffsetWiggle );
 
-  d3.csv("data/grrtano-last-fm_4-14-19.csv", data => {
+  d3.csv("data/grrtano-last-fm_4-14-19.csv").then(data => {
     // Format the date
     data.forEach( d => {
       d.date = parseFullDate(d.date);
@@ -113,10 +133,6 @@ function drawChart(axiosArtists){
         .y0( d => y(d[0]) )
         .y1( d => y(d[1]) );
 
-    let svg = d3.select("body").append("svg")
-        .attr("width", width)
-        .attr("height", height);
-
     // Add the paths and area for artists' playcounts
     svg.selectAll("path")
         .data(stackedData)
@@ -151,7 +167,10 @@ function drawChart(axiosArtists){
       .attr("transform", "translate(0," + height -20 + ")")
       .call(xAxis);
 
-  }); // End d3.csv()
+  }) // End d3.csv()
+  .then( () => {
+    drawButton.attr('class', 'ui button')
+  });
 } // End drawChart();
 
 // ========================== vertical grid line on mousemove ====================================================

@@ -4,11 +4,42 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Graph</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+
     <link href="/dist/main.bundle.css" rel="stylesheet">
   </head>
   <body>
     <!-- <button onclick="transition()">Update</button> -->
+    <div class="ui attached stackable menu">
+  <div class="ui container">
+    <a class="item">
+      <i class="home icon"></i> Home
+    </a>
+    <a class="item">
+      <i class="grid layout icon"></i> Browse
+    </a>
+    <a class="item">
+      <i class="mail icon"></i> Messages
+    </a>
+    <div class="ui simple dropdown item">
+      More
+      <i class="dropdown icon"></i>
+      <div class="menu">
+        <a class="item"><i class="edit icon"></i> Edit Profile</a>
+        <a class="item"><i class="globe icon"></i> Choose Language</a>
+        <a class="item"><i class="settings icon"></i> Account Settings</a>
+      </div>
+    </div>
+    <div class="right item">
+      <button id="draw-button" class="ui button">
+        Draw Chart
+      </button>
+    </div>
+  </div>
+</div>
 
     <script type="text/javascript" src="/dist/app.bundle.js"></script>
   </body>
+
 </html>
