@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import axios from 'axios';
 
 const drawButton = d3.select('#draw-button');
+const warningMessage = d3.select('#warning-msg');
 
 // Axios constants
 const axiosLastfm = axios.create({
@@ -36,11 +37,15 @@ function axiosCall(){
     .catch(err => {
       console.log(err);
       drawButton.attr('class', 'ui yellow button');
+      warningMessage.attr('class', 'ui warning visible message');
+
     })
 }
 
 // =============================================
 function drawChart(axiosArtists){
+  warningMessage.attr('class', 'ui warning hidden message');
+  
   let margin = {top: 20, right: 0, bottom: 0, left: 0}
 
   let width = window.innerWidth,

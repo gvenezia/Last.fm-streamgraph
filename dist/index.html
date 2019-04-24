@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stream Graph</title>
 
+    <!-- CSS and JS for Semantic UI -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.js"></script>
 
     <link href="/dist/main.bundle.css" rel="stylesheet">
   </head>
   <body>
-
+<div class="ui container">
     <div class="ui attached stackable menu">
-      <div class="ui container">
+      
 
         <!-- Input: Username  -->
         <div class="item">
@@ -62,8 +65,18 @@
           </button>
         </div>
       </div>
-    </div>
 
+      <div id="warning-msg" class="ui warning hidden message">
+        <i class="close icon"></i>
+        <div class="header">
+          Request Error
+        </div>
+        Please check for correct variables above
+      </div>
+
+    </div>
+    
+    <!-- Local JS -->
     <script type="text/javascript" src="/dist/app.bundle.js"></script>
   </body>
 
