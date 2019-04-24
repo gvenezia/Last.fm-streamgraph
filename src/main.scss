@@ -10,12 +10,12 @@ body {
 
 svg {
   position: absolute;
+  shape-rendering: geometricPrecision;
 }
 
-button {
-  position: absolute;
-  right: 10px;
-  top: 10px;
+path {
+  stroke: white;
+  stroke-width: 0px;
 }
 
 /* Classes */
