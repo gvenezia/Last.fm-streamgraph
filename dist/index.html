@@ -10,7 +10,7 @@
     <link href="/dist/main.bundle.css" rel="stylesheet">
   </head>
   <body>
-    <!-- <button onclick="transition()">Update</button> -->
+
     <div class="ui attached stackable menu">
       <div class="ui container">
 
@@ -25,14 +25,33 @@
         <!-- Dropdown -->
         <div class="item">
           <div class="ui compact menu">
-            <div class="ui simple dropdown item">
-              Variable Type
-              <i class="dropdown icon"></i>
-              <div class="menu">
-                <div class="item">Artist</div>
-                <div class="item">Genre (Tag)</div>
-              </div>
-            </div>
+            <select class="ui selection simple dropdown item">
+              <option value="">Variable Type</option>
+              <option value="1">Artist</option>
+              <option value="0">Tag (Genre)</option>
+            </select> 
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="ui compact menu">
+            <select class="ui selection simple dropdown item">
+              <option value="">Unit of Time</option>
+              <option value="1">Week</option>
+              <option value="0">Monhth</option>
+              <option value="0">Year</option>
+            </select> 
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="ui compact menu">
+            <select class="ui selection simple dropdown item">
+              <option value="">Length of Time</option>
+              <option value="1">Week</option>
+              <option value="0">Monhth</option>
+              <option value="0">Year</option>
+            </select> 
           </div>
         </div>
 

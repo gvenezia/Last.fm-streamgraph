@@ -12,6 +12,10 @@ const lastfmKeyAndConfig = `&api_key=${process.env.LASTM_KEY}&format=json`;
 // Add button click event to get data and call
 window.onload = function(){
   drawButton.on('click', axiosCall);
+  document.addEventListener("keydown", event => {
+    if (event.key === 'Enter')
+      axiosCall();
+  });
 } 
 
 //  AXIOS CALL AND DATA =============================================
@@ -29,6 +33,10 @@ function axiosCall(){
     .then(response => response.data.topartists.artist.map(d => d.name) )
     // Use artist names in d3 chart
     .then(axiosArtists => {drawChart(axiosArtists)})
+    .catch(err => {
+      console.log(err);
+      drawButton.attr('class', 'ui yellow button');
+    })
 }
 
 // =============================================
