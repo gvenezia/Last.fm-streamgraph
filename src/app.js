@@ -4,6 +4,8 @@ import axios from 'axios';
 const drawButton = d3.select('#draw-button');
 const warningMessage = d3.select('#warning-msg');
 
+console.log(d3.select('#menu').node().getBoundingClientRect().height);
+
 // Axios constants
 const axiosLastfm = axios.create({
     baseURL: `http://ws.audioscrobbler.com/2.0/`
@@ -46,17 +48,20 @@ function axiosCall(){
 function drawChart(axiosArtists){
   warningMessage.attr('class', 'ui warning hidden message');
 
-  let margin = {top: 20, right: 0, bottom: 0, left: 0}
+  // Use M. Bostock's margin convention ( https://bl.ocks.org/mbostock/3019563 )
+  let margin = {top: 10, right: 0, bottom: 10, left: 0}
 
-  let width = window.innerWidth,
-      height = window.innerHeight;
-
-  // Margin convention
+  let width = window.innerWidth - margin.left - margin.right,
+      height = window.innerHeight -
+               d3.select('#menu').node().getBoundingClientRect().height -
+               margin.top - margin.bottom;
+               
   let svg = d3.select("body").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
-      .append('g')
-        .attr('transform', `translate(0,${margin.top})`);
+  
+  let g = svg.append('g')
+        .attr('transform', `translate(${margin.left},${margin.top})`);
 
   // Set the years ==============
   // Date parsing and formatting functions
@@ -147,7 +152,7 @@ function drawChart(axiosArtists){
         .y1( d => y(d[1]) );
 
     // Add the paths and area for artists' playcounts
-    svg.selectAll("path")
+    g.selectAll("path")
         .data(stackedData)
       .enter().append("path")
         .attr("class", 'layer')
@@ -155,7 +160,7 @@ function drawChart(axiosArtists){
         .style("fill", (d,i) => color(i) );
 
     // Add artist's text labels
-    svg.selectAll('text')
+    g.selectAll('text')
         .data(stackedData)
       .enter()
       .append("text")
@@ -177,7 +182,6 @@ function drawChart(axiosArtists){
 
     // Add timeline text at the top
     svg.append('g')
-      .attr("transform", `translate(0,${margin.top})`)
       .call(xAxis);
 
   }) // End d3.csv()
