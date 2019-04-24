@@ -10,7 +10,7 @@ const axiosLastfm = axios.create({
   });
 const lastfmKeyAndConfig = `&api_key=${process.env.LASTM_KEY}&format=json`;
 
-// Add button click event to get data and call
+// Add events to get data and draw chart
 window.onload = function(){
   drawButton.on('click', axiosCall);
   document.addEventListener("keydown", event => {
@@ -45,7 +45,7 @@ function axiosCall(){
 // =============================================
 function drawChart(axiosArtists){
   warningMessage.attr('class', 'ui warning hidden message');
-  
+
   let margin = {top: 20, right: 0, bottom: 0, left: 0}
 
   let width = window.innerWidth,
@@ -177,7 +177,7 @@ function drawChart(axiosArtists){
 
     // Add timeline text at the top
     svg.append('g')
-      .attr("transform", "translate(0," + height -20 + ")")
+      .attr("transform", `translate(0,${margin.top})`)
       .call(xAxis);
 
   }) // End d3.csv()
